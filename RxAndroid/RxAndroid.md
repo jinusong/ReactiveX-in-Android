@@ -134,3 +134,56 @@ Observable.just("Hello, world!")
 ~~~
 * 메서드 레퍼런스를 이용하여 Observable의 생성 코드를 단순하게 했습니다.
 * Observable의 생성 방법은 워낙 다양하고 개발자의 성향에 따라 선택의 기준이 달라질 수 있습니다.
+
+## 제어 흐름
+* 조건문, 순환문은 코드에서 가장 많은 비중을 차지합니다. 리액티브 프로그래밍의 세계에서도 예외는 아니지만 구현 방법이 다릅니다.
+* RxJava에서 제공하는 리액티브 연산자를 이용합니다.
+~~~java
+public class LoopActivity extends AppCompatActivity {
+    public static final String TAG = LoopActivity.class.getSimpleName();
+
+    Iterable<String> samples = Arrays.asList(
+        "banana", "orange", "apple", "apple mango", "melon", "watermelon");
+
+    // Java
+    @OnClick(R.id.btn_loop)
+    void loop() {
+        log(">>>>> get an apple :: java");
+        for(String s : samples) {
+            if(s.contains("apple")) {
+                log(s);
+                return;
+            }
+        }
+    }
+
+    // RxJava 1.x
+    @OnClick(R.id.btn_loop2)
+    void loop2() {
+        log(">>>>> get an apple :: rx 1.x");
+        rx.Observable.from(samples)
+            .filter(s -> s.contains("apple"))
+            .firstOrDefault("Not found")
+            .subscribe(this::log);
+    }
+
+    // RxJava 2.x
+    @OnClick(R.id.btn_loop3)
+    void loop3() {
+        log(">>>>> get an apple :: rx 2.x");
+        Observable.fromIterable(samples)
+            .filter(s -> s.contains("apple"))
+            // skipWhile(S -> !s.contains("apple"))
+            .first("Not found")
+            .subscribe(this::log);
+    }
+}
+~~~
+
+* 위 코드에서 주목해야 하는 부분은 Observable을 이용해 데이터를 발행하고 처리하는 기능에만 집중할 수 있게 된다는 것입니다.
+* 코드를 살펴보면 samples라는 스트림을 입력받고 filter() 함수를 이용하여 'apple'이 아닌 값은 무시했습니다.
+* filter() 함수를 통과한 값은 first() 함수로 첫 번째 값만 처리해 구독자에게 전달합니다.
+* 즉, 기존 자바의 for 문을 filter() 함수와 first() 함수를 이용해 대체했습니다.
+
+* 2.x 버전에서는 fromXXX() 함수를 이용하여 Observable 생성 방식을 세분화했습니다.
+* 1.x에서는 from() 함수의 인자로 Iterable 객체나 배열 등을 구분했지만 2.x에서는 별도의 함수로 분리했습니다.
