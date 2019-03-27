@@ -13,7 +13,7 @@
     * 비동기 구조에서 에러를 다루기 쉽습니다.
     * 함수형 프로그래밍 기법도 부분적으로 적용할 수 있습니다.
 
-### 리액티브 라이브러리와 API
+## 리액티브 라이브러리와 API
 
 * 기본적으로 RxJava의 리액티브 라이브러리를 이용합니다.
 
@@ -39,7 +39,7 @@
     * ReactiveBeacons
     * RxDataBinding
 
-### 안드로이드 스튜디오 설정
+## 안드로이드 스튜디오 설정
 ~~~gradle
 dependencies {
     // Rx Utils dependencies
@@ -63,3 +63,74 @@ dependencies {
 * dependencies 부분에 RxAndroid 라이브러리를 추가해야 합니다.
 * 참고로 RxAndroid는 RxJava에 대한 의존성이 있어 RxJava를 추가하지 않아도 되지만, 최신 버전의 RxJava를 사용하려면 명시해주는 것이 좋습니다.
 
+## RxAndroid의 기본 개념
+
+* RxAndroid의 기본 개념은 RxJava와 동일합니다.
+* RxJava의 구조에 안드로이드의 각 컴포넌트를 사용할 수 있게 변경해 놓은 것입니다.
+* 따라서 RxAndroid의 구성요소는 다음처엄 RxJava의 구성 요소와 같습니다.
+    * Observable: 비즈니스 로직을 이용해 데이터를 발행합니다.
+    * 구독자: Observable에서 발행한 데이터를 구독합니다.
+    * 스케줄러: 스케줄러를 통해서 Observable, 구독자가 어느 스레드에서 실행될지 결정할 수 있습니다.
+
+~~~kotlin
+// 1. Observable 생성
+Observable.create()
+    // 2. 구독자 이용
+    .subscribe()
+
+    // 3. 스케줄러 이용
+    .subscribeOn(Schedulers.io())
+    .observeOn(AndroidSchedulers.mainThread())
+~~~
+
+* Observable과 구독자가 연결되면 스케줄러에서 각 요소가 사용할 스레드를 결정하는 기본적인 구조입니다.
+* Observable이 실행되는 스레드는 subscribeOn() 함수에서 설정하고 처리된 결과를 observeOn() 함수에 설정된 스레드로 보내 최종 처리합니다.
+* RxAndroid에서 제공하는 스케줄러는 무엇이 있을까요
+    * AndroidSchedulers.mainThread(): 안드로이드 UI 스레드에서 동작하는 스케줄러입니다.
+    * HandlerScheduler.from(handler): 특정 핸들러에 의존하여 동작하는 스케줄러입니다.
+
+## Hello world
+* Observable에서 문자를 입력받고 텍스트뷰에 결과를 출력합니다.
+~~~java
+Observable<String> observable = new DispossableObserver<String>() {
+    @Override
+    public void onNext(String s) {
+        textView.setText(s);
+    }
+
+    @Override
+    public void onError(Throwable e) { }
+    @Override
+    public void onComplete() { }
+};
+
+Observable.create(new ObservableOnSubsribe<String>() {
+    @Override
+    public void subscribe(ObservableEmitter<String> e) throws Exception {
+        e.onNext("Hello world!");
+        e.onComplete();
+    } 
+}).subscribe(observer);
+~~~
+
+* Observable.create()로 Observable을 생성해 "Hello world!"를 입력 받고 subscribe() 함수 안 onNext() 함수에 전달합니다.
+* onNext() 함수의 정의를 보면 마지막으로 전달된 문자를 텍스트 뷰에 업데이트하게 되어 있습니다.
+* 따라서 실제 구독자를 subscribe(observable) 함수를 통해 등록하고 호출하면 'Hello world'를 텍스트 뷰애 표시합니다.
+
+### 람다로 표현하자!
+~~~java
+Observable<String>.create(s -> {
+    s.onNext("Hello, world!");
+    s.onComplete();
+}).subscribe(o -> textView.setText(o));
+~~~
+* 콜백 함수를 람다 표현식으로 바꾸면서 데이터의 흐름이 명확해져 가독성이 좋아졌습니다.
+* 전달자는 명확한 단어로 변경할 수도 있지만 기본적으로 이니셜을 많이 사용합니다.
+
+### just() 함수를 이용하자
+~~~java
+Observable.just("Hello, world!")
+    .subscribe(textView::setText);
+~~~
+* 메서드 레퍼런스를 이용하여 Observable의 생성 코드를 단순하게 했습니다.
+* Observable의 생성 방법은 워낙 다양하고 개발자의 성향에 따라 선택의 기준이 달라질 수 있습니다.
