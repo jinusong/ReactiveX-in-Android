@@ -187,3 +187,64 @@ public class LoopActivity extends AppCompatActivity {
 
 * 2.x 버전에서는 fromXXX() 함수를 이용하여 Observable 생성 방식을 세분화했습니다.
 * 1.x에서는 from() 함수의 인자로 Iterable 객체나 배열 등을 구분했지만 2.x에서는 별도의 함수로 분리했습니다.
+
+## UI 이벤트 처리
+* 안드로이드는 사용자가 애플리케이션과 상호 작용할 때 발생하는 특정 View 객체의 이벤트를 얻는 방법을 제공합니다.
+* 따라서 View 클래스 안에는 UI 이벤트를 처리하기 위한 몇 가지 콜백 메서드가 있습니다.
+* 이벤트 리스너라고 하는 인터페이스 모음입니다.
+
+### 이벤트 리스너
+* 이벤트 리스너는 콜백 메서드 하나를 포함하는 뷰 클래스 안의 인터페이스를 뜻합니다. 
+* 리스너가 등록된 뷰 UI 안의 아이템과 사용자 사이에 상호 작용이 발생할 때 안드로이드 프레임워크가 호출합니다.
+    * onClick(): View.OnClickListener에서 콜백함.
+    * onLongClick(): View.onFocusChangeListener에서 콜백함.
+    * onFocusChange(): View.OnFocusChangeListener에서 콜백함.
+    * onKey(): View.OnKeyListener에서 콜백함.
+    * onTouch(): View.OnTouchListener에서 콜백함.
+    * onCreateContextMenu(): View.OnCreateContectMenuListener에서 콜백함.
+
+* 다양한 UI 이벤트 리스너 중 onClick() 메서드에 Observable을 활용한 예제입니다.
+~~~java
+public class onClickFragment extends Fragment {
+    public  static final String TAG = OnClickFragment.class.getSimpleName();
+
+    @BindView(R.id.btn_click_observer)
+    Button mButton;
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        getClickEventObservable()
+            .map(s -> "clicked")
+            .subscribe(getObserver());
+    }
+
+    private Observable<View> getClickEventObservable() {
+        return Observable.create(new ObservableOnSubscribe<View>(){
+            @Override
+            public void subscribe(ObservableEmitter<View> e) throws Exception {
+                mButton.setOnClickListener(e::onNext);
+            }
+        });
+    }
+
+    private DisposableObserver<? super String> getObserver() {
+        return new DisposableObserver<String>() {
+            @Override
+            public void onNext(String s) { log(s); }
+
+            @Override
+            public void onError(Throwable e) { log(e.getMessage()); }
+
+            @Override
+            public void onComplete() { log("complete"); }
+        }
+    }
+}
+~~~
+
+* 동일한 동작을 하는 세 가지 Observable을 작성했습니다. 
+* mButton에 해당하는 아이템을 클릭하면 setOnClickListener() 메서드가 호출되고 메서드 레퍼런스인 e::onNext를 호출합니다.
+* 클릭한 아이템이 있는 View 정보를 전달하면 map() 함수는 'clicked'라는 String 값으로 변경합니다.
+* 그럼 리턴 값이 Observable<View>에서 Observable<String>으로 변경되고 옵서버는 'clicked'를 출력합니다.
+
+* subscribe() 함수의 인자로 View 객체를 전달하는 부분은 목적에 따라 연산자를 이용하여 다양하게 변경할 수 있습니다.
