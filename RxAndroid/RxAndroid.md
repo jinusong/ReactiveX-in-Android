@@ -248,3 +248,64 @@ public class onClickFragment extends Fragment {
 * 그럼 리턴 값이 Observable<View>에서 Observable<String>으로 변경되고 옵서버는 'clicked'를 출력합니다.
 
 * subscribe() 함수의 인자로 View 객체를 전달하는 부분은 목적에 따라 연산자를 이용하여 다양하게 변경할 수 있습니다.
+~~~java
+@Override
+public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+    getClickEventObservableWithLambda()
+        .map(s -> "clicked lambda")
+        .subscribe(this::log);
+}
+
+private Observable<View> getClickEventObservableWithLambda() {
+    return Observable.create(s -> mButtonLambda.setOnClickListener(s::onNext));
+}
+~~~
+
+* 리액티브 프로그래밍에 익숙하거나 람다 표현식 혹은 Stream API를 이미 사용한다면 코드를 좀 더 간결하게 작성할 수 있습니다.
+~~~java
+@Override
+public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+    getClickEventObservableWithRxBinding()
+        .subscribe(this::log);
+}
+
+private Observable<String> getClickEventObservableWithRxBinding() {
+    return RxView.clicks(mButtonBinding)
+        .map(s -> "Clicked Rxbinding");
+}
+~~~
+
+* RxView 객체를 사용하면 Observable의 명시적 생서이 필요 없으며, 
+* 클릭 리스너 설정도 RxView 내부에서 자동 처리되어 코드가 더욱 직관적으로 변하고 가독성도 향상됩니다.
+* 다음은 조금 더 확장 시켜서 미국에 있는 서버 키와 로컬에 있는 키가 서로 같은 값인지 확인하고 그 결과를 정보별로 나눠서 출력합니다.
+
+~~~java
+@Override
+public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+    getClickEventObservableExtra()
+        .map(local -> SEVEN)
+        .flatMap(this::compareNumbers)
+        .subscribe(this::log);
+}
+
+private Observable<String> compareNumbers(int input) {
+    return Observable.just(input)
+        .flatMap(in -> {
+            Random random = new Random();
+            int data = random.nextInt(10);
+            return Observable.just("local : " + in, "remote : " + data, "result = " + (in == data));
+        });
+}
+~~~
+
+* getClickEventObservableExtra() 함수에 있는 로컬 변수 SEVEN은 로컬에서 확인이 필요한 키입니다.
+* compareNumbers() 메서드에서 Random() 함수가 발행하는 숫자는 서버에 저장된 키입니다.
+* 참고로 Random() 함수는 REST API로 구현해야 하는 내용을 임의로 표현한 것입니다.
+
+* map() 함수는 나에게 있는 키를 flatMap() 함수로 전달합니다. 
+* 또 다른 Observable은 해당 킷값을 새로 생성한 값과 비교하여 결과를 3개의 아이템으로 만들어 전달합니다.
+
+## 리액티브 프로그래밍의 의지
+* 앞의 예제는 실험 정신을 발휘한 코드라 수정의 여지는 있지만 리액티브 프로그래밍의 방법을 잘 보여주는 예제입니다.
+* 리액티브 프로그래밍은 Observable과 Observable의 관계를 정의해 가는 것입니다.
+* Observable을 생성해 데이터를 처리하고 결과를 다른 Observable과 조합해 가면서 조금씨 프로그램의 틀을 완성해나가야 합니다.
