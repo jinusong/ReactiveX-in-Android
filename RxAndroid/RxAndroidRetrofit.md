@@ -160,3 +160,9 @@ public class OkHttpFragment extends Fragment {
 * startRetrofit() 메서드도 동일합니다. 하지만 getXXX() 메서드의 실행을 위해서는 retrofit에서 제공하는 Call 인터페이스를 사용합니다.
 * Call 인터페이스의 enqueue() 메서드에 콜백을 등록하면 GSON에서 디코딩한 결과를 화면에 업데이트할 수 있습니다.
 * 참고로 안드로이드에서 Retrofit의 콜백은 UI 스래ㅔ드에서 실행합니다. 만약 처리 시간이 오래 걸리는 작업이 필요하다면 새로운 스레드를 생성해서 실행해야 합니다.
+
+### Observable vs CompletableFuture의 비동기 요청
+
+* Observable에서 여러 개의 요청을 비동기로 처리하는 가장 간단한 방법은 요청 명령 수 만큼 REST Observable을 생성하고 flatMap() 함수를 사용하여 동시에 요청하고 결과를 구독자가 발행하는 것입니다. 
+* CompletableFuture에서는 각각의 명령을 Future 객체로 생성한 다음 allOf() 메소드를 이용하여 모든 명령을 비동기로 요청합니다. 
+* 결과(모든 명령에 대한 처리가 끝나면 결과를 리턴)는 Stream.of()로 묶어서 처리할 수 있습니다.
