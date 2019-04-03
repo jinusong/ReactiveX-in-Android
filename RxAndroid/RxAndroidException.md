@@ -224,7 +224,43 @@ Observable<String> source = Observable.just(url)
 ~~~java
 public static boolean isNetworkAvailable() {
     try {
-        return InetAddress.getByName("www.google.com").isReachable(1000)
+        return InetAddress.getByName("www.google.com").isReachable(1000);
+    } catch(IOException e) {
+        e.printStackTrace();
     }
+    return false;
 }
 ~~~
+
+* 편의상 유명한 사이트인 'www.google.com'에 접속할 수 있는지 확인하여 인터넷에 접속할 수 있는지 간접적으로 확인하도록 구현되어 있습니다.
+* 최대 대기시간은 1000ms입니다.
+
+### retryWhen() 함수
+* 재시도와 관련 있는 함수 중 가장 복잡한 함수입니다.
+* javadoc을 보아도 함수 원형을 이해하기가 어렵습니다.
+* retryWhen() 함수의 람다 표현식 인자는 Observable<Throwable>입니다.
+
+* retryWhen() 함수의 활용 예인 다음 코드는 RxJava 2의 javadoc에 수록된 예제를 발췌했습니다.
+* 세 번의 재시도를 하며, 재시도 횟수가 늘어날 때마다 1000ms씩 재시도 시간이 늘어납니다.
+
+~~~java
+Observable.create((ObservableEmitter<String> emitter) -> {
+    emitter.onError(new RuntimeException("always fails"));
+}).retryWhen(attempts -> {
+    return attempts.zipWith(Observable.range(1, 3), (n, 1) -> i)
+        .flatMap(i -> {
+            Log.d("delay retry by " + i + " seconds");
+            return Observable.timer(i, TimeUnit.SECONDS);
+        }
+    );
+}).blockingForEach(Log::d);
+~~~
+
+* 먼저 Observable은 데이터 발행을 항상 실패하도록 설정했습니다.
+* retryWhen() 함수의 인자인 attempts는 Observable 입니다.
+* 이 상태에서 재시도할 때는 Observable.range(1, 3)과 zip() 함수로 두 Observable을 합성합니다.
+* 즉, 3번 재시도한다는 뜻입니다. 또한 재시도할 때 매번 timer() 함수를 호출하여 1000ms씩 대기 시간을 늘립니다.
+
+* 굵은 글씨로 표시한 것처럼 세번 재시도했고 재시도 횟수에 다라 1000ms씩 대기시간이 늘어납니다.
+* 재시돋 로직은 retryWithDelay() 함수로도 구현할 수 있습니다.
+* retryWhen() 함수는 재시도 조건을 동적으로 설정해야 하는 복잡한 로직을 구현할 때 활용하기 바랍니다.
