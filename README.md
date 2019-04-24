@@ -1,4 +1,4 @@
-# RxJava2
+# ReactiveX
 ## 참고
 * 저는 설명보단 코드 중심적으로 커밋을 할 생각이라서 앞으로 이해하기 어려운 코드가 있다면 [안드로이드스터디](https://github.com/taeiim/Android-Study/blob/master/study/week12/RxJava/RxJava.md)를 참고해주시면 감사하겠습니다. 
 * 또한 이 레퍼지토리에서는 단순히 RxJava2만 다루지 않고 안드로이드 개발자를 위한 RxAndroid도 함께 다룹니다.
