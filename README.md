@@ -1,8 +1,8 @@
 # ReactiveX
 ## 참고
-* 저는 설명보단 코드 중심적으로 커밋을 할 생각이라서 앞으로 이해하기 어려운 코드가 있다면 [안드로이드스터디](https://github.com/taeiim/Android-Study/blob/master/study/week12/RxJava/RxJava.md)를 참고해주시면 감사하겠습니다. 
-* 또한 이 레퍼지토리에서는 단순히 RxJava2만 다루지 않고 안드로이드 개발자를 위한 RxAndroid도 함께 다룹니다.
-* 한빛미디어의 RxJava 프로그래밍 책을 중심으로 작성하였습니다.
+* 이해하기 어려운 코드가 있다면 [안드로이드스터디](https://github.com/taeiim/Android-Study/blob/master/study/week12/RxJava/RxJava.md)를 참고해주시면 감사하겠습니다. 
+* 또한 이 레퍼지토리에서는 단순히 RxJava2만 다루지 않고 안드로이드 개발자를 위한 RxAndroid, RxKotlin도 함께 다룹니다.
+* RxJava2는 한빛미디어의 RxJava 프로그래밍 책을 중심으로 작성하였습니다.
 
 ## 소개
 * RxJava2를 배우기 전에 리액티브 프로그래밍이란 무엇인지, RxJava2는 무엇인지 확실하게 개념을 잡고 시작하는 편이 좋습니다.
